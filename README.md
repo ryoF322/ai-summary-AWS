@@ -14,4 +14,16 @@ DynamoDBへ保存・API経由で参照可能にするシステムです。
 通話は最大30分を想定し、  
 TranscribeおよびLLM要約処理を含めてLambdaの制限内で完結する設計としています。
 
+## 処理フロー
+
+### 要約生成フロー
+
+1. Amazon Connect → 通話録音
+2. 録音データをS3へ保存
+3. S3イベントでLambda起動
+4. Transcribeジョブ開始
+5. Transcribe完了をEventBridgeで検知
+6. Lambdaで文字起こし取得
+7. Bedrockで要約生成
+8. DynamoDBへ保存
 
