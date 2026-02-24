@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# 設定
+.env
+
+# ログファイル
+logs/
+*.log
+
+# エディタ
+.vscode/
+
+# OS
+.DS_Store
+
