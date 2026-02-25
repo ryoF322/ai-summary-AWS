@@ -1,20 +1,17 @@
 # Python
 __pycache__/
 *.pyc
+venv/
 
-# 設定
+# 環境変数
 .env
 
-# ログファイル
+# ログ
 logs/
 *.log
 
-# エディタ
+# VSCode
 .vscode/
 
-# OS
+# macOS
 .DS_Store
-
-venv/
-__pycache__/
-*.pyc
