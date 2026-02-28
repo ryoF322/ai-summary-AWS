@@ -12,6 +12,7 @@ transcribe_client = boto3.client('transcribe')
 # Lambda コンソールまたは IaC（CDK/Terraform等）で設定する
 OUTPUT_BUCKET = os.environ.get('TRANSCRIBE_OUTPUT_BUCKET')  # 文字起こし結果の保存先バケット
 OUTPUT_PREFIX = os.environ.get('OUTPUT_PREFIX', 'transcripts/')  # 結果ファイルのS3プレフィックス
+KMS_KEY_ID = os.environ.get('KMS_KEY_ID')
 
 def lambda_handler(event, context):
     #S3のObjectCreatedイベントをトリガーに呼び出されるメイン関数。
@@ -61,6 +62,7 @@ def lambda_handler(event, context):
             LanguageCode='ja-JP',  # 日本語
             OutputBucketName=OUTPUT_BUCKET,
             OutputKey=f"{OUTPUT_PREFIX}{job_name}.json",
+            OutputEncryptionKMSKeyId=KMS_KEY_ID,
             Settings={
                 'ShowSpeakerLabels': True,   # 話者分離（オペレーター/顧客の区別）
                 'MaxSpeakerLabels': 2,        # Amazon Connectは基本2者通話
