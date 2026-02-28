@@ -66,6 +66,7 @@ def lambda_handler(event, context):
                 'MaxSpeakerLabels': 2,        # Amazon Connectは基本2者通話
                 'ShowAlternatives': False,
             },
+            OutputEncryptionKMSKeyId=os.environ.get('KMS_KEY_ID')
         )
 
         job_info = response['TranscriptionJob']
