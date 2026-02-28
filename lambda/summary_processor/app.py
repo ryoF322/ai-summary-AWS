@@ -18,7 +18,7 @@ TRANSCRIPT_BUCKET = os.environ.get('TRANSCRIPT_BUCKET')          # 文字起こ�
 DYNAMODB_TABLE    = os.environ.get('DYNAMODB_TABLE')             # 要約結果の保存先DynamoDBテーブル名
 BEDROCK_MODEL_ID  = os.environ.get(                              # 使用するBedrockモデルID
     'BEDROCK_MODEL_ID',
-    'anthropic.claude-3-5-sonnet-20241022-v2:0'                  # デフォルト: Claude 3.5 Sonnet
+    'anthropic.claude-3-haiku-20240307-v1:0'                
 )
 
 # Bedrockへ送るプロンプトテンプレート
