@@ -57,7 +57,7 @@ def lambda_handler(event, context):
         response = transcribe_client.start_transcription_job(
             TranscriptionJobName=job_name,
             Media={'MediaFileUri': media_uri},
-            MediaFormat=media_format,
+            MediaFormat=format_map[file_ext],
             LanguageCode='ja-JP',  # 日本語
             OutputBucketName=OUTPUT_BUCKET,
             OutputKey=f"{OUTPUT_PREFIX}{job_name}.json",
@@ -66,10 +66,6 @@ def lambda_handler(event, context):
                 'MaxSpeakerLabels': 2,        # Amazon Connectは基本2者通話
                 'ShowAlternatives': False,
             },
-            Tags=[
-                {'Key': 'SourceBucket', 'Value': bucket_name},
-                {'Key': 'SourceKey', 'Value': object_key[:256]},
-            ]
         )
 
         job_info = response['TranscriptionJob']
