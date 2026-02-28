@@ -27,7 +27,7 @@ jobs:
         run: |
           zip transcribe_starter.zip lambda/transcribe_start/app.py
           aws lambda update-function-code \
-            --function-name call-summary-dev-transcribe-starter \
+            --function-name transcribe-start \
             --zip-file fileb://transcribe_starter.zip
 
       # 要約処理LambdaをZIP化してデプロイ
@@ -35,7 +35,7 @@ jobs:
         run: |
           zip summarizer.zip lambda/summary_processor/app.py
           aws lambda update-function-code \
-            --function-name call-summary-dev-summarizer \
+            --function-name summarize \
             --zip-file fileb://summarizer.zip
 
       # API取得LambdaをZIP化してデプロイ
@@ -43,5 +43,5 @@ jobs:
         run: |
           zip api_handler.zip lambda/get_summary_api/app.py
           aws lambda update-function-code \
-            --function-name call-summary-dev-api-handler \
+            --function-name api-handler \
             --zip-file fileb://api_handler.zip
