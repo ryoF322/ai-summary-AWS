@@ -210,59 +210,41 @@ def format_transcript_with_speakers(transcript_json: dict) -> str:
 
 def generate_summary(transcript_text: str) -> dict:
     """
-    整形済み文字起こしテキストをBedrockのClaudeモデルに送り
-    通話内容の要約をJSON形式で生成して返す。
-
-    Args:
-        transcript_text: 話者ラベル付きの文字起こしテキスト
-
-    Returns:
-        要約結果のdictionary
-        例: {
-            "call_purpose": "商品未着の問い合わせ",
-            "response_summary": "配送状況を確認し再送手配を案内",
-            ...
-        }
+    Nova Lite (amazon.nova-lite-v1) 用の要約処理
     """
 
-    # プロンプトテンプレートに文字起こしテキストを埋め込む
     prompt = SUMMARY_PROMPT_TEMPLATE.format(transcript=transcript_text)
 
-    # Bedrock（Claude）へのリクエストボディを構築
-    # Anthropic Messages API形式を使用
+    # Nova形式のリクエスト
     request_body = {
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 1024,
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        # 出力のランダム性を抑え安定した要約を得るため温度は低めに設定
-        "temperature": 0.2,
-        "top_p"      : 0.9
+        "inputText": prompt,
+        "textGenerationConfig": {
+            "maxTokenCount": 800,
+            "temperature": 0.2,
+            "topP": 0.9
+        }
     }
 
     print(f"Calling Bedrock model: {BEDROCK_MODEL_ID}")
 
-    # Bedrockを呼び出して要約を生成
-    bedrock_response = bedrock_client.invoke_model(
-        modelId     = BEDROCK_MODEL_ID,
-        body        = json.dumps(request_body),
-        contentType = 'application/json',
-        accept      = 'application/json'
+    response = bedrock_client.invoke_model(
+        modelId=BEDROCK_MODEL_ID,
+        body=json.dumps(request_body),
+        contentType="application/json",
+        accept="application/json"
     )
 
-    # レスポンスボディをパース
-    response_body = json.loads(bedrock_response['body'].read().decode('utf-8'))
+    # レスポンス読み取り
+    response_body = json.loads(
+        response["body"].read().decode("utf-8")
+    )
 
-    # Claudeの応答テキストを取得（content[0].textに格納されている）
-    raw_text = response_body['content'][0]['text']
+    #  NovaLiteのレスポンス形式
+    raw_text = response_body["results"][0]["outputText"]
+
     print(f"Bedrock raw response: {raw_text}")
 
-    # BedrockはJSON以外の文章を前後に付けることがあるため
-    # JSON部分だけを抽出してパースする
+    # 既存のJSON抽出関数を利用
     summary = extract_json_from_response(raw_text)
 
     return summary
