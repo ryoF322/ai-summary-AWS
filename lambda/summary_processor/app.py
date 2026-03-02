@@ -18,7 +18,7 @@ TRANSCRIPT_BUCKET = os.environ.get('TRANSCRIPT_BUCKET')          # 文字起こ�
 DYNAMODB_TABLE    = os.environ.get('DYNAMODB_TABLE')             # 要約結果の保存先DynamoDBテーブル名
 BEDROCK_MODEL_ID  = os.environ.get(                              # 使用するBedrockモデルID
     'BEDROCK_MODEL_ID',
-    'amazon.nova-lite-v1:0'               
+    'amazon.nova-2-lite-v1:0'               
 )
 
 # Bedrockへ送るプロンプトテンプレート
@@ -209,45 +209,33 @@ def format_transcript_with_speakers(transcript_json: dict) -> str:
 # STEP 2: Bedrockによる要約生成
 
 def generate_summary(transcript_text: str) -> dict:
-    """
-    Nova Lite (amazon.nova-lite-v1) 用の要約処理
-    """
 
-    prompt = SUMMARY_PROMPT_TEMPLATE.format(transcript=transcript_text)
-
-    # Nova形式のリクエスト
-    request_body = {
-        "inputText": prompt,
-        "textGenerationConfig": {
-            "maxTokenCount": 800,
-            "temperature": 0.2,
-            "topP": 0.9
-        }
-    }
+    prompt = SUMMARY_PROMPT_TEMPLATE.format(
+        transcript=transcript_text
+    )
 
     print(f"Calling Bedrock model: {BEDROCK_MODEL_ID}")
 
-    response = bedrock_client.invoke_model(
+    response = bedrock_client.converse(
         modelId=BEDROCK_MODEL_ID,
-        body=json.dumps(request_body),
-        contentType="application/json",
-        accept="application/json"
+        messages=[
+            {
+                "role": "user",
+                "content": [{"text": prompt}]
+            }
+        ],
+        inferenceConfig={
+            "maxTokens": 800,
+            "temperature": 0.2,
+            "topP": 0.9
+        }
     )
 
-    # レスポンス読み取り
-    response_body = json.loads(
-        response["body"].read().decode("utf-8")
-    )
+    raw_text = response["output"]["message"]["content"][0]["text"]
 
-    #  NovaLiteのレスポンス形式
-    raw_text = response_body["results"][0]["outputText"]
+    print("Bedrock raw response:", raw_text)
 
-    print(f"Bedrock raw response: {raw_text}")
-
-    # 既存のJSON抽出関数を利用
-    summary = extract_json_from_response(raw_text)
-
-    return summary
+    return extract_json_from_response(raw_text)
 
 
 def extract_json_from_response(text: str) -> dict:
